@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>App Launcher</title>
+    <link href="https://cdn.jsdelivr.net/npm/picocss@1.5.0/pico.min.css" rel="stylesheet">
+    <style>
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; }
+        .app-card { cursor: pointer; text-align: center; padding: 1rem; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Showcase Demos</h1>
+        <div id="demo-container" class="app-grid"></div>
+    </main>
+
+    <script>
+    fetch('/demos')
+        .then(r => r.json())
+        .then(data => {
+            const container = document.getElementById('demo-container');
+            data.demos.forEach(demo => {
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.innerHTML = `
+                    <img src="/static/screenshots/${demo.image}" style="width:100%;cursor:pointer;">
+                    <h3>${demo.headline}</h3>
+                    <p>${demo.description}</p>
+                `;
+                card.querySelector('img').onclick = () => {
+                    fetch('/launch_demo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(demo)
+                    })
+                    .then(r => r.json())
+                    .then(console.log)
+                    .catch(console.error);
+                };
+                container.appendChild(card);
+            });
+        });
+    </script>
+</body>
+</html>

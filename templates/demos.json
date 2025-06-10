@@ -1,0 +1,18 @@
+[
+  {
+    "headline": "Calc",
+    "description": "Whetever this is",
+    "image": "Calc.png",
+    "launch": [
+      { "program": "COVISE", "args": ["-e", "C:/Users/Dennis/Apps/covise/net/examples/Calc.net"] }
+    ]
+  },
+  {
+    "headline": "Shelby",
+    "description": "A 3D model of a Shelby car",
+    "image": "Shelby.png",
+    "launch": [
+      { "program": "opencover", "args": ["C:/Users/Dennis/Data/Modelle/Shelby.3ds"] }
+    ]
+  }
+]
