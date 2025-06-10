@@ -76,6 +76,22 @@
                     <p>${demo.description}</p>
                 `;
                 card.querySelector('img').onclick = () => launchDemoWithCheck(demo);
+                card.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                // Only allow closing if this card is running
+                if (card.classList.contains('running')) {
+                    if (confirm(`Do you want to close "${demo.headline}"?`)) {
+                        fetch('/terminate_process', {method: 'POST'})
+                            .then(r => r.json())
+                            .then(res => {
+                                if (res.status === "terminated") {
+                                    card.classList.remove('running');
+                                    highlightRunningDemo();
+                                }
+                            });
+                    }
+                }
+            });
                 container.appendChild(card);
             });
         });
