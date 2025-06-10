@@ -18,7 +18,7 @@ def is_pid_running(pid):
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder=os.path.join(os.path.dirname(__file__), '..', 'static'))
 
-running_process = {"pid": None, "program": None}
+running_process = {"pid": None, "program": None, "headline": None}
 
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), '..', 'config', 'config.default.json')
@@ -97,8 +97,12 @@ def launch_demo():
             env=env,
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
+        #todo: handle multiple processes
         running_process["pid"] = process.pid
-        running_process["program"] = program  # or app_name for launch_app 
+        running_process["program"] = program  
+        running_process["headline"] = data.get('headline', None) 
+        h = running_process["headline"]
+        print(f"running_process[\"headline\"] {h}")
         threading.Thread(target=monitor_process, args=(process, program), daemon=True).start()
 
     return jsonify({"status": "success"})
@@ -108,7 +112,7 @@ def launch_demo():
 def get_running_process():
     print(f"Checking running process: {running_process['pid']} running: {running_process['program']}")
     if running_process["pid"] and is_pid_running(running_process["pid"]):
-        return jsonify({"running": True, "program": running_process["program"]})
+        return jsonify({"running": True, "program": running_process["program"], "headline": running_process["headline"]})
     return jsonify({"running": False})
 
 

@@ -6,6 +6,7 @@
     <style>
         .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; }
         .app-card { cursor: pointer; text-align: center; padding: 1rem; }
+        .running { border: 3px solid #28a745; box-shadow: 0 0 10px #28a745; }
     </style>
 </head>
 <body>
@@ -31,17 +32,36 @@
     }
 
     function launchDemo(demo) {
+        console.log("demo.headline: ", demo.headline); 
         fetch('/launch_demo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(demo)
         })
         .then(r => r.json())
-        .then(console.log)
+        .then(() => highlightRunningDemo())
         .catch(console.error);
     }
 
-        // Fetch and display demos
+    function highlightRunningDemo() {
+        fetch('/running_process')
+        .then(r => r.json())
+        .then(status => {
+            console.log("highlightRunningDemo called"); 
+            console.log("status:", status); 
+            document.querySelectorAll('.app-card').forEach(card => {
+                card.classList.remove('running');
+                // demo-program is set as a data attribute
+                if (status.running && card.headline === status.headline) {
+                    card.classList.add('running');
+                    console.log("setting running class for", card.headline); 
+
+                }
+            });
+        });
+    }
+
+    // Fetch and display demos
     fetch('/demos')
         .then(r => r.json())
         .then(data => {
@@ -49,6 +69,7 @@
             data.demos.forEach(demo => {
                 const card = document.createElement('div');
                 card.className = 'app-card';
+                card.headline = demo.headline;
                 card.innerHTML = `
                     <img src="/static/screenshots/${demo.image}" style="width:100%;cursor:pointer;">
                     <h3>${demo.headline}</h3>
