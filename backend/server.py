@@ -4,7 +4,7 @@ import webbrowser
 import os
 import json
 import threading
-
+import sys
 import psutil
 # ...existing code...
 
@@ -87,15 +87,15 @@ def launch_demo():
         env_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'covise.env')
         env_vars = load_env_vars(env_path)
         env = os.environ.copy()
-        for k, v in env_vars.items():
-            if k.lower() == "path":
-                env["PATH"] = v
-            else:
-                env[k] = v
+        env.update(env_vars)
+        kwargs = {
+        "env": env,
+        }
+        if sys.platform.startswith("win"):
+            kwargs["creationflags"] = subprocess.CREATE_NEW_CONSOLE
         process = subprocess.Popen(
             [exe_path] + args,
-            env=env,
-            creationflags=subprocess.CREATE_NEW_CONSOLE
+            **kwargs
         )
         #todo: handle multiple processes
         running_process["pid"] = process.pid
