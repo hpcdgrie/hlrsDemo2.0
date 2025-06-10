@@ -1,20 +1,76 @@
 [
-  {
-    "headline": "Calc",
-    "tags": ["simulation", "timeseries"],
-    "description": "Whetever this is",
-    "image": "Calc.png",
-    "launch": [
-      { "program": "COVISE", "args": ["-e", "C:/Users/Dennis/Apps/covise/net/examples/Calc.net"] }
-    ]
-  },
-  {
-    "headline": "Shelby",
-    "tags": ["automotive", "car"],
-    "description": "A 3D model of a Shelby car",
-    "image": "Shelby.png",
-    "launch": [
-      { "program": "opencover", "args": ["C:/Users/Dennis/Data/Modelle/Shelby.3ds"] }
-    ]
-  }
+    {
+        "headline": "Audi",
+        "tags": [
+            "automotive",
+            "cfd"
+        ],
+        "description": "Airflow around an old Audi, perfect to showcase interaction with simulation data in COVISE",
+        "image": "Calc.png",
+        "launch": [
+            {
+                "program": "COVISE",
+                "args": [
+                    "-e",
+                    "/data/covise_net/2009/Audi_Bilder.net"
+                ]
+            }
+        ]
+    },
+    {
+        "headline": "Forbach",
+        "tags": [
+            "city planning",
+            "noise",
+            "cfd",
+            "machinery",
+            "boreholes"
+        ],
+        "description": "With the topographical conditions of the traditional power plant and the strong support of the local community, Forbach offers ideal framework conditions for expanding the site. The project is intended to exemplify sustainable action in every respect. The underground construction method minimizes the impact on nature and the population during the construction phase. To compensate for the few remaining effects, extensive measures have already been implemented, such as relocating native lizards for species conservation. From planning to operation, the project is accompanied by environmental planning offices and nature conservation experts. The project includes the realization of an underground cavern storage facility and a cavern power plant. The existing machinery, some of which is up to 100 years old, will be decommissioned and replaced with new, more efficient units. Together with the existing equalization basin, these components will form the new lower stage. The Schwarzenbach Dam serves as the upper reservoir.",
+        "image": "Shelby.png",
+        "launch": [
+            {
+                "program": "COVISE",
+                "args": [
+                    "-e",
+                    "/data/enbw/2015/out/LaermFinal.net"
+                ]
+            }
+        ]
+    },
+    {
+        "headline": "Calc",
+        "tags": [
+            "simulation",
+            "timeseries"
+        ],
+        "description": "Whetever this is",
+        "image": "Calc.png",
+        "launch": [
+            {
+                "program": "COVISE",
+                "args": [
+                    "-e",
+                    "C:/Users/Dennis/Apps/covise/net/examples/Calc.net"
+                ]
+            }
+        ]
+    },
+    {
+        "headline": "Shelby",
+        "tags": [
+            "automotive",
+            "car"
+        ],
+        "description": "A 3D model of a Shelby car",
+        "image": "Shelby.png",
+        "launch": [
+            {
+                "program": "opencover",
+                "args": [
+                    "C:/Users/Dennis/Data/Modelle/Shelby.3ds"
+                ]
+            }
+        ]
+    }
 ]
