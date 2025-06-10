@@ -18,6 +18,9 @@ def is_pid_running(pid):
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder=os.path.join(os.path.dirname(__file__), '..', 'static'))
 
+running_process = {"pid": None, "program": None}
+
+
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), '..', 'config', 'config.default.json')
 with open(CONFIG_PATH, 'r') as f:
     config = json.load(f)
@@ -31,8 +34,10 @@ def stream_output(stream, prefix):
 
 def monitor_process(process, app_name):
     process.wait()
+    running_process["pid"] = None
+    running_process["program"] = None
     print(f"Process {app_name} with PID {process.pid} has terminated.")
-
+    
 def load_env_vars(env_path):
     env = {}
     if os.path.isfile(env_path):
@@ -87,42 +92,39 @@ def launch_demo():
                 env["PATH"] = v
             else:
                 env[k] = v
-        subprocess.Popen(
+        process = subprocess.Popen(
             [exe_path] + args,
             env=env,
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
+        running_process["pid"] = process.pid
+        running_process["program"] = program  # or app_name for launch_app 
+        threading.Thread(target=monitor_process, args=(process, program), daemon=True).start()
+
     return jsonify({"status": "success"})
 
-@app.route('/launch', methods=['POST'])
-def launch_app():
-    app_name = request.json.get('app')
-    print(f"Launching app: {app_name}")
-    if app_name in APPS:
-        exe_path = find_app_executable(APPS[app_name])
-        print(f"Executable path: {exe_path}")
-        # Load environment variables from covise.env
-        env_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'covise.env')
-        env_vars = load_env_vars(env_path)
+
+@app.route('/running_process', methods=['GET'])
+def get_running_process():
+    print(f"Checking running process: {running_process['pid']} running: {running_process['program']}")
+    if running_process["pid"] and is_pid_running(running_process["pid"]):
+        return jsonify({"running": True, "program": running_process["program"]})
+    return jsonify({"running": False})
+
+
+@app.route('/terminate_process', methods=['POST'])
+def terminate_process():
+    if running_process["pid"] and is_pid_running(running_process["pid"]):
         try:
-            env = os.environ.copy()
-            env.update(env_vars)
-            process = subprocess.Popen(
-                exe_path,
-                env=env,
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True  # For string output instead of bytes
-            )
-            # Start a thread to print stderr in real time
-            threading.Thread(target=stream_output, args=(process.stderr, "STDERR"), daemon=True).start()
-            threading.Thread(target=monitor_process, args=(process, app_name), daemon=True).start()
-            return jsonify({"status": "success", "pid": process.pid})
+            p = psutil.Process(running_process["pid"])
+            p.terminate()
+            running_process["pid"] = None
+            running_process["program"] = None
+            return jsonify({"status": "terminated"})
         except Exception as e:
-            print(f"Error launching app: {e}")
             return jsonify({"status": "error", "message": str(e)})
-    return jsonify({"status": "error", "message": "App not found"})
+    return jsonify({"status": "no_process"})
+
 
 @app.route('/apps', methods=['GET'])
 def get_apps():

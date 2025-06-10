@@ -15,6 +15,33 @@
     </main>
 
     <script>
+    function launchDemoWithCheck(demo) {
+        fetch('/running_process')
+            .then(r => r.json())
+            .then(status => {
+                if (status.running) {
+                    if (confirm(`Another program (${status.program}) is running. Terminate it and start the new one?`)) {
+                        fetch('/terminate_process', {method: 'POST'})
+                            .then(() => launchDemo(demo));
+                    }
+                } else {
+                    launchDemo(demo);
+                }
+            });
+    }
+
+    function launchDemo(demo) {
+        fetch('/launch_demo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(demo)
+        })
+        .then(r => r.json())
+        .then(console.log)
+        .catch(console.error);
+    }
+
+        // Fetch and display demos
     fetch('/demos')
         .then(r => r.json())
         .then(data => {
@@ -27,16 +54,7 @@
                     <h3>${demo.headline}</h3>
                     <p>${demo.description}</p>
                 `;
-                card.querySelector('img').onclick = () => {
-                    fetch('/launch_demo', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(demo)
-                    })
-                    .then(r => r.json())
-                    .then(console.log)
-                    .catch(console.error);
-                };
+                card.querySelector('img').onclick = () => launchDemoWithCheck(demo);
                 container.appendChild(card);
             });
         });
