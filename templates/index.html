@@ -12,10 +12,65 @@
 <body>
     <main class="container">
         <h1>Showcase Demos</h1>
+        <input type="text" id="search" placeholder="Search demos..." style="margin-bottom:1rem;width:100%;">
         <div id="demo-container" class="app-grid"></div>
     </main>
 
     <script>
+    let allDemos = [];
+
+    function scoreDemo(demo, query) {
+        if (!query) return 0;
+        const q = query.toLowerCase();
+        let score = 0;
+        // Prioritize headline
+        if (demo.headline && demo.headline.toLowerCase().includes(q)) score += 100;
+        // Then tags
+        if (demo.tags && demo.tags.some(tag => tag.toLowerCase().includes(q))) score += 10;
+        // Then description
+        if (demo.description && demo.description.toLowerCase().includes(q)) score += 1;
+        return score;
+    }
+
+    function renderDemos(demos, query = "") {
+        const container = document.getElementById('demo-container');
+        container.innerHTML = '';
+        // Sort by score descending
+        demos
+            .map(demo => ({demo, score: scoreDemo(demo, query)}))
+            .filter(obj => obj.score > 0 || !query)
+            .sort((a, b) => b.score - a.score)
+            .forEach(obj => {
+                const demo = obj.demo;
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.headline = demo.headline;
+                card.innerHTML = `
+                    <img src="/static/screenshots/${demo.image}" style="width:100%;cursor:pointer;">
+                    <h3>${demo.headline}</h3>
+                    <p>${demo.description}</p>
+                `;
+                card.querySelector('img').onclick = () => launchDemoWithCheck(demo);
+                card.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    if (card.classList.contains('running')) {
+                        if (confirm(`Do you want to close "${demo.headline}"?`)) {
+                            fetch('/terminate_process', {method: 'POST'})
+                                .then(r => r.json())
+                                .then(res => {
+                                    if (res.status === "terminated") {
+                                        card.classList.remove('running');
+                                        highlightRunningDemo();
+                                    }
+                                });
+                        }
+                    }
+                });
+                container.appendChild(card);
+            });
+        highlightRunningDemo();
+    }
+
     function launchDemoWithCheck(demo) {
         fetch('/running_process')
             .then(r => r.json())
@@ -61,39 +116,16 @@
         });
     }
 
+    document.getElementById('search').addEventListener('input', function() {
+        renderDemos(allDemos, this.value);
+    });
+
     // Fetch and display demos
     fetch('/demos')
         .then(r => r.json())
         .then(data => {
-            const container = document.getElementById('demo-container');
-            data.demos.forEach(demo => {
-                const card = document.createElement('div');
-                card.className = 'app-card';
-                card.headline = demo.headline;
-                card.innerHTML = `
-                    <img src="/static/screenshots/${demo.image}" style="width:100%;cursor:pointer;">
-                    <h3>${demo.headline}</h3>
-                    <p>${demo.description}</p>
-                `;
-                card.querySelector('img').onclick = () => launchDemoWithCheck(demo);
-                card.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                // Only allow closing if this card is running
-                if (card.classList.contains('running')) {
-                    if (confirm(`Do you want to close "${demo.headline}"?`)) {
-                        fetch('/terminate_process', {method: 'POST'})
-                            .then(r => r.json())
-                            .then(res => {
-                                if (res.status === "terminated") {
-                                    card.classList.remove('running');
-                                    highlightRunningDemo();
-                                }
-                            });
-                    }
-                }
-            });
-                container.appendChild(card);
-            });
+            allDemos = data.demos;
+            renderDemos(allDemos);
         });
     </script>
 </body>

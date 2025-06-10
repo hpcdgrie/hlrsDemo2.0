@@ -1,6 +1,7 @@
 [
   {
     "headline": "Calc",
+    "tags": ["simulation", "timeseries"],
     "description": "Whetever this is",
     "image": "Calc.png",
     "launch": [
@@ -9,6 +10,7 @@
   },
   {
     "headline": "Shelby",
+    "tags": ["automotive", "car"],
     "description": "A 3D model of a Shelby car",
     "image": "Shelby.png",
     "launch": [
